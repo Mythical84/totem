@@ -1,0 +1,18 @@
+* Imports
+* For loops 
+* Tertiary operator
+* Lists
+* Dictionaries (Preferably python style)
+* Do While loops
+* Type hinting
+* Error catching (Likely will require a complete rewrite of the error system)
+* Function overloading
+* Short hands for variable addition, subtraction, multiplication, and division
+* Arbitrary number of arguments for functions
+* Loop labels
+* Convert primitives to classes so they have builtin methods
+* Enums
+* Rewrite the compiler in totem
+* Syntax highlighting for vscode
+* Treesitter syntax highlighting for neovim
+* LSP language server

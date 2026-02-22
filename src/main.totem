@@ -1,0 +1,31 @@
+class Main {
+	fn new(val) {
+		self.test = val;
+	}
+
+	fn p(var) {
+		let test = "Hello, World" + var;
+		println(test);
+		self.p2();
+	}
+
+	fn p2() {
+		println("Hello 2");
+	}
+
+	fn speak() {
+		println(self);
+	}
+}
+
+println(Main);
+
+let test = Main();
+println(test);
+test.p("foo");
+test.new(1234);
+test.bob = 4;
+println(test.bob);
+println(test.test);
+let method = test.speak;
+method();
