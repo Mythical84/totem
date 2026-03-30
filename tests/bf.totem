@@ -1,0 +1,62 @@
+tape = []
+program = "++++++++++[>+>+++>+++++++>++++++++++<<<<-]>>>++.>+.+++++++..+++.<<++.>+++++++++++++++.>.+++.------.--------.<<<."
+
+i = 0
+while i < 30_000 {
+	i += 1
+	append(tape, 0)
+}
+
+pointer = 0
+index = 0
+
+fn parseloop() {
+	index += 1
+	l = index
+	loop {
+		parsechar(program[index])
+		index += 1
+		if program[index] == "]" {
+			if tape[pointer] == 0 {
+				break
+			}
+			index = l
+		}
+	}
+}
+
+fn parsechar(in) {
+	if in == ">" {
+		pointer += 1
+		if pointer > 30_000 {
+			pointer = 30_000
+		}
+	} else if in == "<" {
+		pointer -= 1
+		if pointer < 0 {
+			pointer = 0
+		}
+	} else if in == "+" {
+		tape[pointer] += 1
+		if tape[pointer] > 255 {
+			tape[pointer] = 0
+		}
+	} else if in == "-" {
+		tape[pointer] -= 1
+		if tape[pointer] < 0 {
+			tape[pointer] = 255
+		}
+	} else if in == "." {
+		print(chr(tape[pointer]))
+	} else if in == "," {
+		v = input("")[0]
+		tape[pointer] = ord(v)
+	} else if in == "[" {
+		parseloop()
+	}
+}
+
+while index < len(program) {
+	parsechar(program[index])
+	index += 1
+}

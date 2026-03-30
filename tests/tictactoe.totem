@@ -1,0 +1,47 @@
+end = false
+player_1 = true
+
+board = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+
+fn print_board() {
+	print "0 " + board[0]
+	print "1 " + board[1]
+	print "2 " + board[2]
+	print "   0  1  2"
+}
+
+while !end {
+	if player_1 {
+		print "Player 1's turn"
+	} else {
+		print "Player 2's turn"
+	}
+	print_board()
+	in = input("Enter move in format xy: ")
+	x = int(in[0])
+	y = int(in[1])
+	if board[y][x] != 0 {
+		player_1 = !player_1
+		print "Invalid move"
+	} else if player_1 {
+		board[y][x] = 1
+	} else {
+		board[y][x] = 2
+	}
+	player_1 = !player_1
+
+	if (board[y][0] == board[y][1] and board[y][1] == board[y][2]
+		or board[0][x] == board[1][x] and board[1][x] == board[2][x]
+		or board[0][0] == board[1][1] and board[1][1] == board[2][2]
+		or board[0][2] == board[1][1] and board[1][1] == board[2][0]) {
+
+		end = true
+	}
+
+}
+
+if !player_1 {
+	print "Player 1 wins!"
+} else {
+	print "Player 2 wins!"
+}
