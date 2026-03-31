@@ -25,7 +25,7 @@ type Function struct {
 
 func (self Function) Call(inter interpreter, args []any, _ int) (any, error) {
 	prev := env
-	env = CreateEnv(prev)
+	env = CreateEnv(prev, filename)
 	for i := range args {
 		env.Define(self.args[i], args[i], true)
 	}
@@ -110,6 +110,15 @@ type ClassInstance struct {
 
 func (self ClassInstance) String() string {
 	return "<'" + self.name + "' object>"
+}
+
+type Module struct {
+	name string
+	env *Environment
+}
+
+func (self Module) String() string {
+	return "<module '" + self.name + "'>"
 }
 
 type IterType interface {

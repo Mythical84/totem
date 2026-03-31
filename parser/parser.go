@@ -9,8 +9,8 @@ import (
 )
 
 var tokens []Token
-var index = 0
-var grouping = 0
+var index int
+var grouping int
 var filename string
 var text string
 
@@ -22,6 +22,8 @@ func Parse(token_list []Token, content string, file string) ([]Stmt, []error) {
 	is_error := false
 	stmts := []Stmt{}
 	errors := []error{}
+	index = 0
+	grouping = 0
 
 	for !at_end() {
 		stmt, errs := declaration()
@@ -148,6 +150,8 @@ func statement() (Stmt, []error) {
 		return break_statement()
 	} else if match(CONTINUE) {
 		return continue_statement()
+	} else if match(IMPORT) {
+		return import_statement()
 	} else {
 		return expression_statement()
 	}
@@ -277,6 +281,18 @@ func continue_statement() (Stmt, []error) {
 		return nil, err
 	}
 	return Continue{Line: previous().Line}, nil
+}
+
+func import_statement() (Stmt, []error) {
+	path, err := consume("Expected import path", peek().Location, STR)
+	if err != nil {
+		return nil, err
+	}
+	_, err = consume("Invalid syntax", previous().Location, EOL)
+	if err != nil {
+		return nil, err
+	}
+	return Import{Path: path}, nil
 }
 
 func expression_statement() (Stmt, []error) {

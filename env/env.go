@@ -8,19 +8,27 @@ import (
 )
 
 type Environment struct {
+	local map[string] any
 	values map[string]any
 	Parent *Environment
+	file string
 }
 
-func CreateEnv(parent *Environment) *Environment {
+func CreateEnv(parent *Environment, file string) *Environment {
 	return &Environment{
 		Parent: parent,
 		values: map[string]any{},
+		local: map[string]any{},
+		file: file,
 	}
 }
 
 func (self Environment) Define(name string, value any, local bool) {
-	if !local && self.Parent != nil {
+	if local {
+		self.local[name] = value
+		return
+	}
+	if self.Parent != nil {
 		if _, err := self.Parent.Get(name, 0, ""); err == nil {
 			self.Parent.Define(name, value, local)
 		} else {
@@ -32,6 +40,12 @@ func (self Environment) Define(name string, value any, local bool) {
 }
 
 func (self Environment) Get(name string, line int, file string) (any, error) {
+	if file == self.file {
+		val, ok := self.local[name]
+		if ok {
+			return val, nil
+		}
+	}
 	val, ok := self.values[name]
 	if ok {
 		return val, nil

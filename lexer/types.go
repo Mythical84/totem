@@ -79,6 +79,7 @@ const (
 	TRY
 	CATCH
 	LOCAL
+	IMPORT
 )
 
 var TokenName = map[TokenType]string{
@@ -133,6 +134,7 @@ var TokenName = map[TokenType]string{
 	TRY:           "TRY",
 	CATCH:         "CATCH",
 	LOCAL:         "LOCAL",
+	IMPORT:        "IMPORT",
 }
 
 var token_type = map[rune]TokenType{

@@ -6,15 +6,20 @@ import (
 	"unicode"
 )
 
-var tokens = []Token{}
-var start_line = 1
-var line = 1
-var start = 0
-var current = 0
+var tokens []Token
+var start_line int 
+var line int
+var start int
+var current int
 var text string
 var file string
 
 func Lexer(input string, filename string) ([]Token, []error) {
+	tokens = []Token{}
+	start_line = 1
+	line = 1
+	start = 0
+	current = 0
 	error_list := []error{}
 	text = input
 	file = filename
@@ -198,6 +203,8 @@ func get_keyword_token_type(keyword string) TokenType {
 		return CATCH
 	case "local":
 		return LOCAL
+	case "import":
+		return IMPORT
 	default:
 		return EOF
 	}

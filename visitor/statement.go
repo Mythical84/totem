@@ -98,10 +98,18 @@ func (self Break) Accept(visitor Visitor) error {
 	return visitor.VisitBreak(self)
 }
 
-type Continue struct{
+type Continue struct {
 	Line int
 }
 
 func (self Continue) Accept(visitor Visitor) error {
 	return visitor.VisitContinue(self)
+}
+
+type Import struct {
+	Path Token
+}
+
+func (self Import) Accept(visitor Visitor) error {
+	return visitor.VisitImport(self)
 }

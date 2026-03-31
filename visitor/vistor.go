@@ -13,6 +13,7 @@ type Visitor interface {
 	VisitBreak(break_stmt Break) error
 	VisitContinue(continue_stmt Continue) error
 	VisitClassDecl(class_decl ClassDecl) error
+	VisitImport(import_stmt Import) error
 
 	// Expressions
 	VisitBinary(binary Binary) (any, error)

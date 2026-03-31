@@ -10,19 +10,28 @@ import (
 )
 
 func CreateGlobals() *Environment {
-	globals := CreateEnv(nil)
+	globals := CreateEnv(nil, "")
 
-	globals.Define("clock", Clock{name: "clock"}, true)
-	globals.Define("input", Input{name: "input"}, true)
-	globals.Define("int", Int{name: "int"}, true)
-	globals.Define("append", Append{name: "append"}, true)
-	globals.Define("chr", Chr{name: "chr"}, true)
-	globals.Define("len", Len{name: "len"}, true)
-	globals.Define("ord", Ord{name: "ord"}, true)
-	globals.Define("print", Print{name: "print"}, true)
-	globals.Define("println", Println{name: "println"}, true)
+	globals.Define("clock", Clock{name: "clock"}, false)
+	globals.Define("input", Input{name: "input"}, false)
+	globals.Define("int", Int{name: "int"}, false)
+	globals.Define("append", Append{name: "append"}, false)
+	globals.Define("chr", Chr{name: "chr"}, false)
+	globals.Define("len", Len{name: "len"}, false)
+	globals.Define("ord", Ord{name: "ord"}, false)
+	globals.Define("print", Print{name: "print"}, false)
+	globals.Define("println", Println{name: "println"}, false)
 
 	return globals
+}
+
+func CreateBuiltin(name string) (*Environment, bool) {
+	switch name {
+	case "math":
+		return CreateMath(), true
+	default:
+		return nil, false
+	}
 }
 
 type Base struct{ name string }
@@ -150,6 +159,9 @@ func (self Ord) Arity() int {
 type Print Base
 
 func (self Print) Call(inter interpreter, args []any, _ int) (any, error) {
+	if len(args) == 0 {
+		return nil, nil
+	}
 	var str strings.Builder
 	for _, val := range args[:len(args)-1] {
 		fmt.Fprintf(&str, "%v ", val)
@@ -167,6 +179,10 @@ func (self Print) Arity() int {
 type Println Base
 
 func (self Println) Call(inter interpreter, args []any, _ int) (any, error) {
+	if len(args) == 0 {
+		fmt.Println("")
+		return nil, nil
+	}
 	var str strings.Builder
 	for _, val := range args[:len(args)-1] {
 		fmt.Fprintf(&str, "%v ", val)

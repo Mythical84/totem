@@ -1,23 +1,29 @@
 package interpreter
 
 import (
+	"errors"
 	"fmt"
 	. "main/env"
 	. "main/errors"
+	"main/lexer"
 	. "main/lexer"
+	"main/parser"
 	. "main/visitor"
 	"math"
 	"os"
 	"reflect"
 	"slices"
+	"strings"
 )
 
 var filename string
 var env *Environment
+var globals *Environment
 
 func Interpret(stmts []Stmt, file string) {
 	filename = file
-	env = CreateEnv(CreateGlobals())
+	globals = CreateGlobals()
+	env = CreateEnv(globals, filename)
 	inter := interpreter{}
 	for _, stmt := range stmts {
 		err := inter.execute(stmt)
@@ -26,6 +32,27 @@ func Interpret(stmts []Stmt, file string) {
 			os.Exit(1)
 		}
 	}
+}
+
+func (self interpreter) interpret_import(stmts []Stmt, path string, file string) error {
+	prev_file := filename
+	prev_env := env
+	filename = path 
+	env = CreateEnv(globals, filename)
+	inter := interpreter{}
+	for _, stmt := range stmts {
+		err := inter.execute(stmt)
+		if err != nil {
+			return nil
+		}
+	}
+
+	mod := Module{name: path, env: env}
+
+	env = prev_env
+	filename = prev_file
+	env.Define(file, mod, true)
+	return nil
 }
 
 func (self interpreter) execute(stmt Stmt) error {
@@ -56,7 +83,7 @@ func (self interpreter) VisitFunc(func_stmt Func) error {
 // the parent init function
 func (self interpreter) VisitClassDecl(class_decl ClassDecl) error {
 	prev := env
-	temp := CreateEnv(prev)
+	temp := CreateEnv(prev, filename)
 	env = temp
 
 	if class_decl.Superclass != nil {
@@ -115,7 +142,7 @@ func (self interpreter) VisitExpression(expression Expression) error {
 
 func (self interpreter) VisitBlock(block Block) error {
 	prev := env
-	env = CreateEnv(env)
+	env = CreateEnv(env, filename)
 
 	for _, stmt := range block.Body {
 		err := self.execute(stmt)
@@ -204,6 +231,44 @@ func (self interpreter) VisitBreak(break_stmt Break) error {
 
 func (self interpreter) VisitContinue(continue_stmt Continue) error {
 	return ContinueErrorType{Line: continue_stmt.Line, Filename: filename}
+}
+
+func (self interpreter) VisitImport(import_stmt Import) error {
+	if builtin, ok := CreateBuiltin(import_stmt.Path.Value.(string)); ok {
+		mod := Module{name: import_stmt.Path.Value.(string), env: builtin}
+		env.Define(import_stmt.Path.Value.(string), mod, true)
+		return nil
+	}
+	in_path := import_stmt.Path.Value.(string) + ".totem"
+	in_name := strings.Split(import_stmt.Path.Value.(string), "/")
+	if _, err := os.Stat(in_path); errors.Is(err, os.ErrNotExist) {
+		return RuntimeError("Import file does not exist", 
+			import_stmt.Path.Line, filename)
+	}
+
+	data, _ := os.ReadFile(in_path)
+	content := string(data)
+	tokens, err := lexer.Lexer(content, in_path)
+	if err != nil {
+		for _, e := range err {
+			os.Stderr.WriteString(e.Error() + "\n")
+		}
+		return nil
+	}
+	fmt.Printf("token stream: %+v\n", tokens)
+	ast, err := parser.Parse(tokens, content, in_path)
+	if err != nil {
+		for _, e := range err {
+			os.Stderr.WriteString(e.Error() + "\n")
+		}
+		return nil
+	}
+	fmt.Printf("ast: %#v\n", ast)
+
+	fmt.Println("\n---Program Output---")
+	self.interpret_import(ast, in_path, in_name[len(in_name)-1])
+
+	return nil
 }
 
 // TODO: Implement once I have classes
@@ -495,6 +560,8 @@ func (self interpreter) VisitGet(get Get) (any, error) {
 	switch instance := instance.(type) {
 	case ClassInstance:
 		return instance.env.Get(get.Name.Value.(string), get.Name.Line, filename)
+	case Module:
+		return instance.env.Get(get.Name.Value.(string), get.Name.Line, filename)
 	default:
 		return nil, RuntimeError("Only instances have properties",
 			get.Name.Line, filename)
@@ -509,6 +576,13 @@ func (self interpreter) VisitSet(set Set) (any, error) {
 
 	switch instance := instance.(type) {
 	case ClassInstance:
+		val, err := self.evaluate(set.Val)
+		if err != nil {
+			return nil, err
+		}
+		instance.env.Define(set.Name.Value.(string), val, true)
+		return val, nil
+	case Module:
 		val, err := self.evaluate(set.Val)
 		if err != nil {
 			return nil, err
