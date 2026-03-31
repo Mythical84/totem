@@ -205,6 +205,8 @@ func get_keyword_token_type(keyword string) TokenType {
 		return LOCAL
 	case "import":
 		return IMPORT
+	case "throw":
+		return THROW
 	default:
 		return EOF
 	}

@@ -113,3 +113,12 @@ type Import struct {
 func (self Import) Accept(visitor Visitor) error {
 	return visitor.VisitImport(self)
 }
+
+type Throw struct {
+	Expr Expr
+	Line int
+}
+
+func (self Throw) Accept(visitor Visitor) error {
+	return visitor.VisitThrow(self)
+}

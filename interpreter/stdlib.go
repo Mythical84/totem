@@ -27,7 +27,7 @@ func CreateGlobals() *Environment {
 
 func CreateBuiltin(name string) (*Environment, bool) {
 	switch name {
-	case "math":
+	case "Math":
 		return CreateMath(), true
 	default:
 		return nil, false

@@ -33,13 +33,11 @@ func CreateMath() *Environment {
 	temp.Define("tan", Tan{name: "tan"}, false)
 	
 	// Constants
-	temp.Define("pi", math.Pi, false)
-	temp.Define("e", math.E, false)
-	temp.Define("phi", math.Phi, false)
-	temp.Define("maxint", math.MaxFloat64, false)
-	temp.Define("minint", -math.MaxFloat64, false)
-	temp.Define("posinf", math.Inf(1), false)
-	temp.Define("neginf", math.Inf(-1), false)
+	temp.Define("PI", math.Pi, false)
+	temp.Define("E", math.E, false)
+	temp.Define("PHI", math.Phi, false)
+	temp.Define("POSINF", math.Inf(1), false)
+	temp.Define("NEGINF", math.Inf(-1), false)
 
 	return temp
 }

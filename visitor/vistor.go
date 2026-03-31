@@ -14,6 +14,7 @@ type Visitor interface {
 	VisitContinue(continue_stmt Continue) error
 	VisitClassDecl(class_decl ClassDecl) error
 	VisitImport(import_stmt Import) error
+	VisitThrow(throw Throw) error
 
 	// Expressions
 	VisitBinary(binary Binary) (any, error)

@@ -271,7 +271,6 @@ func (self interpreter) VisitImport(import_stmt Import) error {
 	return nil
 }
 
-// TODO: Implement once I have classes
 func (self interpreter) VisitTryCatch(try_catch TryCatch) error {
 	err := self.execute(try_catch.TryBody)
 	if err != nil {
@@ -279,12 +278,24 @@ func (self interpreter) VisitTryCatch(try_catch TryCatch) error {
 		case ReturnErrorType, ContinueErrorType, BreakErrorType:
 			return err
 		default:
-			self.execute(try_catch.CatchBody)
-			return nil
+			prev := env
+			env = CreateEnv(prev, filename)
+			env.Define(try_catch.ErrName.Value.(string), err.Error(), true)
+			err = self.execute(try_catch.CatchBody)
+			env = prev
+			return err
 		}
 	} else {
 		return nil
 	}
+}
+
+func (self interpreter) VisitThrow(throw Throw) error {
+	msg, err := self.evaluate(throw.Expr)
+	if err != nil {
+		return err
+	}
+	return RuntimeError(fmt.Sprintf("%v", msg), throw.Line, filename)
 }
 
 // Expressions
@@ -312,12 +323,12 @@ func (self interpreter) VisitBinary(binary Binary) (any, error) {
 		return math.Pow(left.(float64), right.(float64)), nil
 	case DIV:
 		if right.(float64) == 0 {
-			RuntimeError("Division by 0", binary.Operator.Line, filename)
+			return nil, RuntimeError("Division by 0", binary.Operator.Line, filename)
 		}
 		return left.(float64) / right.(float64), nil
 	case MOD:
 		if right.(float64) == 0 {
-			RuntimeError("Division by 0", binary.Operator.Line, filename)
+			return nil, RuntimeError("Division by 0", binary.Operator.Line, filename)
 		}
 		return math.Mod(left.(float64), right.(float64)), nil
 	case MUL:

@@ -25,6 +25,7 @@ func Parse(token_list []Token, content string, file string) ([]Stmt, []error) {
 	index = 0
 	grouping = 0
 
+	match(EOL)
 	for !at_end() {
 		stmt, errs := declaration()
 		if errs != nil {
@@ -152,6 +153,8 @@ func statement() (Stmt, []error) {
 		return continue_statement()
 	} else if match(IMPORT) {
 		return import_statement()
+	} else if match(THROW) {
+		return throw_statement()
 	} else {
 		return expression_statement()
 	}
@@ -293,6 +296,18 @@ func import_statement() (Stmt, []error) {
 		return nil, err
 	}
 	return Import{Path: path}, nil
+}
+
+func throw_statement() (Stmt, []error) {
+	msg, err := expression()
+	if err != nil {
+		return nil, err
+	}
+	_, err = consume("Invalid syntax", previous().Location, EOL)
+	if err != nil {
+		return nil, err
+	}
+	return Throw{Expr: msg, Line: previous().Line}, nil
 }
 
 func expression_statement() (Stmt, []error) {
