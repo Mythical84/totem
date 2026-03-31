@@ -14,11 +14,13 @@ import (
 	"reflect"
 	"slices"
 	"strings"
+	"time"
 )
 
 var filename string
 var env *Environment
 var globals *Environment
+var start = time.Now()
 
 func Interpret(stmts []Stmt, file string) {
 	filename = file
@@ -32,6 +34,18 @@ func Interpret(stmts []Stmt, file string) {
 			os.Exit(1)
 		}
 	}
+}
+
+func Evaluate(stmts []Stmt, file string) error {
+	filename = file
+	inter := interpreter{}
+	for _, stmt := range stmts {
+		err := inter.execute(stmt)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (self interpreter) interpret_import(stmts []Stmt, path string, file string) error {

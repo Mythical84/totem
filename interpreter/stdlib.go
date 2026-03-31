@@ -6,7 +6,6 @@ import (
 	. "main/errors"
 	"strconv"
 	"strings"
-	"time"
 )
 
 func CreateGlobals() *Environment {
@@ -29,6 +28,8 @@ func CreateBuiltin(name string) (*Environment, bool) {
 	switch name {
 	case "Math":
 		return CreateMath(), true
+	case "Os":
+		return CreateOs(), true
 	default:
 		return nil, false
 	}
@@ -38,16 +39,6 @@ type Base struct{ name string }
 
 func (self Base) String() string {
 	return "<builtin-function '" + self.name + "'>"
-}
-
-type Clock Base
-
-func (self Clock) Call(inter interpreter, args []any, _ int) (any, error) {
-	return float64(time.Now().Unix()), nil
-}
-
-func (self Clock) Arity() int {
-	return 0
 }
 
 type Input Base
